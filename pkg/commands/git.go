@@ -58,6 +58,7 @@ type GitCommand struct {
 	Cmd oscommands.ICmdObjBuilder
 
 	Submodules SubmoduleCommands
+	Tags       TagCommands
 }
 
 // NewGitCommand it runs git commands
@@ -86,6 +87,9 @@ func NewGitCommand(
 
 	cmd := NewGitCmdObjBuilder(cmn.Log, osCommand.Cmd)
 
+	submoduleCommands := NewSubmoduleCommands(cmn, cmd, dotGitDir)
+	tagCommands := NewTagCommands(cmn, cmd)
+
 	gitCommand := &GitCommand{
 		Common:        cmn,
 		OSCommand:     osCommand,
@@ -95,6 +99,8 @@ func NewGitCommand(
 		GitConfig:     gitConfig,
 		GetCmdWriter:  func() io.Writer { return ioutil.Discard },
 		Cmd:           cmd,
+		Submodules:    submoduleCommands,
+		Tags:          tagCommands,
 	}
 
 	gitCommand.Loaders = Loaders{
@@ -107,8 +113,6 @@ func NewGitCommand(
 		Stash:         loaders.NewStashLoader(cmn, cmd),
 		Tags:          loaders.NewTagLoader(cmn, cmd),
 	}
-
-	gitCommand.Submodules = NewSubmoduleCommands(cmn, cmd, dotGitDir)
 
 	gitCommand.PatchManager = patch.NewPatchManager(gitCommand.Log, gitCommand.ApplyPatch, gitCommand.ShowFileDiff)
 
@@ -258,4 +262,8 @@ func (c *GitCommand) GetDotGitDir() string {
 
 func (c *GitCommand) GetCmd() oscommands.ICmdObjBuilder {
 	return c.Cmd
+}
+
+func (c *GitCommand) DetectUnamePass(cmdObj oscommands.ICmdObj, promptUserForCredential func(string) string) error {
+	return c.OSCommand.DetectUnamePass(cmdObj, c.GetCmdWriter(), promptUserForCredential)
 }

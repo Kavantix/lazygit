@@ -67,7 +67,6 @@ func (c *GitCommand) UnStageFile(fileNames []string, reset bool) error {
 }
 
 func (c *GitCommand) BeforeAndAfterFileForRename(file *models.File) (*models.File, *models.File, error) {
-
 	if !file.IsRename() {
 		return nil, nil, errors.New("Expected renamed file")
 	}
@@ -76,9 +75,7 @@ func (c *GitCommand) BeforeAndAfterFileForRename(file *models.File) (*models.Fil
 	// all files, passing the --no-renames flag and then recursively call the function
 	// again for the before file and after file.
 
-	filesWithoutRenames := loaders.
-		NewFileLoader(c.Common, c.Cmd, c.GitConfig).
-		GetStatusFiles(loaders.GetStatusFileOptions{NoRenames: true})
+	filesWithoutRenames := c.Loaders.Files.GetStatusFiles(loaders.GetStatusFileOptions{NoRenames: true})
 
 	var beforeFile *models.File
 	var afterFile *models.File

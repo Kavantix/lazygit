@@ -554,8 +554,7 @@ func (gui *Gui) refreshStateFiles() error {
 	prevNodes := gui.State.FileManager.GetAllItems()
 	prevSelectedLineIdx := gui.State.Panels.Files.SelectedLineIdx
 
-	files := loaders.
-		NewFileLoader(gui.Common, gui.GitCommand.Cmd, gui.GitCommand.GitConfig).
+	files := gui.GitCommand.Loaders.Files.
 		GetStatusFiles(loaders.GetStatusFileOptions{})
 
 	// for when you stage the old file of a rename and the new file is in a collapsed dir

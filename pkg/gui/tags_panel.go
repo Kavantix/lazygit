@@ -81,7 +81,7 @@ func (gui *Gui) handleDeleteTag(tag *models.Tag) error {
 		title:  gui.Tr.DeleteTagTitle,
 		prompt: prompt,
 		handleConfirm: func() error {
-			if err := gui.GitCommand.WithSpan(gui.Tr.Spans.DeleteTag).DeleteTag(tag.Name); err != nil {
+			if err := gui.GitCommand.WithSpan(gui.Tr.Spans.DeleteTag).Tags.Delete(tag.Name); err != nil {
 				return gui.surfaceError(err)
 			}
 			return gui.refreshSidePanels(refreshOptions{mode: ASYNC, scope: []RefreshableView{COMMITS, TAGS}})
@@ -103,7 +103,8 @@ func (gui *Gui) handlePushTag(tag *models.Tag) error {
 		findSuggestionsFunc: gui.getRemoteSuggestionsFunc(),
 		handleConfirm: func(response string) error {
 			return gui.WithWaitingStatus(gui.Tr.PushingTagStatus, func() error {
-				err := gui.GitCommand.WithSpan(gui.Tr.Spans.PushTag).PushTag(response, tag.Name, gui.promptUserForCredential)
+				cmdObj := gui.GitCommand.Tags.GetPushCmdObj(response, tag.Name)
+				err := gui.GitCommand.WithSpan(gui.Tr.Spans.PushTag).DetectUnamePass(cmdObj, gui.promptUserForCredential)
 				gui.handleCredentialsPopup(err)
 
 				return nil

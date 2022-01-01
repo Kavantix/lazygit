@@ -612,7 +612,7 @@ func (gui *Gui) handleCreateAnnotatedTag(commitSha string) error {
 			return gui.prompt(promptOpts{
 				title: gui.Tr.TagMessageTitle,
 				handleConfirm: func(msg string) error {
-					if err := gui.GitCommand.WithSpan(gui.Tr.Spans.CreateAnnotatedTag).CreateAnnotatedTag(tagName, commitSha, msg); err != nil {
+					if err := gui.GitCommand.WithSpan(gui.Tr.Spans.CreateAnnotatedTag).Tags.CreateAnnotated(tagName, commitSha, msg); err != nil {
 						return gui.surfaceError(err)
 					}
 					return gui.afterTagCreate(tagName)
@@ -626,7 +626,7 @@ func (gui *Gui) handleCreateLightweightTag(commitSha string) error {
 	return gui.prompt(promptOpts{
 		title: gui.Tr.TagNameTitle,
 		handleConfirm: func(tagName string) error {
-			if err := gui.GitCommand.WithSpan(gui.Tr.Spans.CreateLightweightTag).CreateLightweightTag(tagName, commitSha); err != nil {
+			if err := gui.GitCommand.WithSpan(gui.Tr.Spans.CreateLightweightTag).Tags.CreateLightweight(tagName, commitSha); err != nil {
 				return gui.surfaceError(err)
 			}
 			return gui.afterTagCreate(tagName)

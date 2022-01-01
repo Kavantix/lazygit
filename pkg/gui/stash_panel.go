@@ -1,7 +1,6 @@
 package gui
 
 import (
-	"github.com/jesseduffield/lazygit/pkg/commands/loaders"
 	"github.com/jesseduffield/lazygit/pkg/commands/models"
 	"github.com/jesseduffield/lazygit/pkg/utils"
 )
@@ -38,8 +37,7 @@ func (gui *Gui) stashRenderToMain() error {
 }
 
 func (gui *Gui) refreshStashEntries() error {
-	gui.State.StashEntries = loaders.
-		NewStashLoader(gui.Common, gui.GitCommand.Cmd).
+	gui.State.StashEntries = gui.GitCommand.Loaders.Stash.
 		GetStashEntries(gui.State.Modes.Filtering.GetPath())
 
 	return gui.State.Contexts.Stash.HandleRender()
