@@ -215,9 +215,7 @@ func (gui *Gui) fetch(canPromptForCredentials bool, span string) (err error) {
 	defer gui.Mutexes.FetchMutex.Unlock()
 
 	fetchOpts := commands.FetchOptions{}
-	if canPromptForCredentials {
-		fetchOpts.PromptUserForCredential = gui.promptUserForCredential
-	}
+	fetchOpts.Background = !canPromptForCredentials
 
 	err = gui.GitCommand.WithSpan(span).Fetch(fetchOpts)
 

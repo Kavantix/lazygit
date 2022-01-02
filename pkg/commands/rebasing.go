@@ -306,3 +306,18 @@ func (c *GitCommand) DiscardOldFileChanges(commits []*models.Commit, commitIndex
 	// continue
 	return c.GenericMergeOrRebaseAction("rebase", "continue")
 }
+
+// CherryPickCommits begins an interactive rebase with the given shas being cherry picked onto HEAD
+func (c *GitCommand) CherryPickCommits(commits []*models.Commit) error {
+	todo := ""
+	for _, commit := range commits {
+		todo = "pick " + commit.Sha + " " + commit.Name + "\n" + todo
+	}
+
+	cmdObj, err := c.PrepareInteractiveRebaseCommand("HEAD", todo, false)
+	if err != nil {
+		return err
+	}
+
+	return cmdObj.Run()
+}

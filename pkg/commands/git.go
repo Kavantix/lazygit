@@ -36,6 +36,8 @@ type Loaders struct {
 	Tags          *loaders.TagLoader
 }
 
+type PromptUserForCredentialFn func(string) string
+
 // GitCommand is our main git interface
 type GitCommand struct {
 	*common.Common
@@ -49,6 +51,8 @@ type GitCommand struct {
 
 	// Push to current determines whether the user has configured to push to the remote branch of the same name as the current or not
 	PushToCurrent bool
+
+	promptUserForCredential PromptUserForCredentialFn
 
 	// this is just a view that we write to when running certain commands.
 	// Coincidentally at the moment it's the same view that OnRunCommand logs to
@@ -126,6 +130,10 @@ func NewGitCommand(
 	gitCommand.PatchManager = patch.NewPatchManager(gitCommand.Log, gitCommand.WorkingTree.ApplyPatch, gitCommand.WorkingTree.ShowFileDiff)
 
 	return gitCommand, nil
+}
+
+func (c *GitCommand) SetPromptUserForCredential(fn PromptUserForCredentialFn) {
+	c.promptUserForCredential = fn
 }
 
 func (c *GitCommand) WithSpan(span string) *GitCommand {

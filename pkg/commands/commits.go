@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/jesseduffield/lazygit/pkg/commands/models"
 	"github.com/jesseduffield/lazygit/pkg/commands/oscommands"
 )
 
@@ -82,21 +81,6 @@ func (c *GitCommand) Revert(sha string) error {
 
 func (c *GitCommand) RevertMerge(sha string, parentNumber int) error {
 	return c.Cmd.New(fmt.Sprintf("git revert %s -m %d", sha, parentNumber)).Run()
-}
-
-// CherryPickCommits begins an interactive rebase with the given shas being cherry picked onto HEAD
-func (c *GitCommand) CherryPickCommits(commits []*models.Commit) error {
-	todo := ""
-	for _, commit := range commits {
-		todo = "pick " + commit.Sha + " " + commit.Name + "\n" + todo
-	}
-
-	cmdObj, err := c.PrepareInteractiveRebaseCommand("HEAD", todo, false)
-	if err != nil {
-		return err
-	}
-
-	return cmdObj.Run()
 }
 
 // CreateFixupCommit creates a commit that fixes up a previous commit

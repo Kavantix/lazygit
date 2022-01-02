@@ -461,6 +461,7 @@ func NewGui(cmn *common.Common, gitCommand *commands.GitCommand, oSCommand *osco
 	oSCommand.SetOnRunCommand(onRunCommand)
 	gui.OnRunCommand = onRunCommand
 	gui.PopupHandler = &RealPopupHandler{gui: gui}
+	gui.GitCommand.SetPromptUserForCredential(gui.promptUserForCredential)
 
 	authors.SetCustomAuthors(gui.UserConfig.Gui.AuthorColors)
 

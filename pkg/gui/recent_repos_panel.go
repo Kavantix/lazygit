@@ -77,6 +77,7 @@ func (gui *Gui) dispatchSwitchToRepo(path string, reuse bool) error {
 	if err != nil {
 		return err
 	}
+	newGitCommand.SetPromptUserForCredential(gui.promptUserForCredential)
 	gui.GitCommand = newGitCommand
 
 	gui.g.Update(func(*gocui.Gui) error {

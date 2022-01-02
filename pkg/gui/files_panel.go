@@ -710,10 +710,9 @@ func (gui *Gui) pullWithLock(opts PullFilesOptions) error {
 
 	err := gitCommand.Pull(
 		commands.PullOptions{
-			PromptUserForCredential: gui.promptUserForCredential,
-			RemoteName:              opts.RemoteName,
-			BranchName:              opts.BranchName,
-			FastForwardOnly:         opts.FastForwardOnly,
+			RemoteName:      opts.RemoteName,
+			BranchName:      opts.BranchName,
+			FastForwardOnly: opts.FastForwardOnly,
 		},
 	)
 	if err == nil {
@@ -739,7 +738,7 @@ func (gui *Gui) push(opts pushOpts) error {
 			UpstreamRemote: opts.upstreamRemote,
 			UpstreamBranch: opts.upstreamBranch,
 			SetUpstream:    opts.setUpstream,
-		}, gui.promptUserForCredential)
+		})
 
 		if err != nil && !opts.force && strings.Contains(err.Error(), "Updates were rejected") {
 			forcePushDisabled := gui.UserConfig.Git.DisableForcePushing
