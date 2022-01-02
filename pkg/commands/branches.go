@@ -150,20 +150,6 @@ func (c *GitCommand) IsHeadDetached() bool {
 	return err != nil
 }
 
-// ResetHardHead runs `git reset --hard`
-func (c *GitCommand) ResetHard(ref string) error {
-	return c.Cmd.New("git reset --hard " + c.OSCommand.Quote(ref)).Run()
-}
-
-// ResetSoft runs `git reset --soft HEAD`
-func (c *GitCommand) ResetSoft(ref string) error {
-	return c.Cmd.New("git reset --soft " + c.OSCommand.Quote(ref)).Run()
-}
-
-func (c *GitCommand) ResetMixed(ref string) error {
-	return c.Cmd.New("git reset --mixed " + c.OSCommand.Quote(ref)).Run()
-}
-
 func (c *GitCommand) RenameBranch(oldName string, newName string) error {
 	return c.Cmd.New(fmt.Sprintf("git branch --move %s %s", c.OSCommand.Quote(oldName), c.OSCommand.Quote(newName))).Run()
 }

@@ -13,8 +13,8 @@ type TagCommands struct {
 	cmd oscommands.ICmdObjBuilder
 }
 
-func NewTagCommands(common *common.Common, cmd oscommands.ICmdObjBuilder) TagCommands {
-	return TagCommands{
+func NewTagCommands(common *common.Common, cmd oscommands.ICmdObjBuilder) *TagCommands {
+	return &TagCommands{
 		Common: common,
 		cmd:    cmd,
 	}

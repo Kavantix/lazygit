@@ -71,7 +71,7 @@ func (c *GitCommand) ShowCmdObj(sha string, filterPath string) oscommands.ICmdOb
 		filterPathArg = fmt.Sprintf(" -- %s", c.OSCommand.Quote(filterPath))
 	}
 
-	cmdStr := fmt.Sprintf("git show --submodule --color=%s --unified=%d --no-renames --stat -p %s %s", c.colorArg(), contextSize, sha, filterPathArg)
+	cmdStr := fmt.Sprintf("git show --submodule --color=%s --unified=%d --no-renames --stat -p %s %s", c.UserConfig.Git.Paging.ColorArg, contextSize, sha, filterPathArg)
 	return c.Cmd.New(cmdStr)
 }
 

@@ -59,7 +59,7 @@ func (gui *Gui) filesRenderToMain() error {
 		return gui.refreshMergePanelWithLock()
 	}
 
-	cmdObj := gui.GitCommand.WorktreeFileDiffCmdObj(node, false, !node.GetHasUnstagedChanges() && node.GetHasStagedChanges(), gui.State.IgnoreWhitespaceInDiffView)
+	cmdObj := gui.GitCommand.WorkingTree.WorktreeFileDiffCmdObj(node, false, !node.GetHasUnstagedChanges() && node.GetHasStagedChanges(), gui.State.IgnoreWhitespaceInDiffView)
 
 	refreshOpts := refreshMainOpts{main: &viewUpdateOpts{
 		title: gui.Tr.UnstagedChanges,
@@ -68,7 +68,7 @@ func (gui *Gui) filesRenderToMain() error {
 
 	if node.GetHasUnstagedChanges() {
 		if node.GetHasStagedChanges() {
-			cmdObj := gui.GitCommand.WorktreeFileDiffCmdObj(node, false, true, gui.State.IgnoreWhitespaceInDiffView)
+			cmdObj := gui.GitCommand.WorkingTree.WorktreeFileDiffCmdObj(node, false, true, gui.State.IgnoreWhitespaceInDiffView)
 
 			refreshOpts.secondary = &viewUpdateOpts{
 				title: gui.Tr.StagedChanges,
@@ -158,7 +158,7 @@ func (gui *Gui) stageSelectedFile() error {
 		return nil
 	}
 
-	return gui.GitCommand.StageFile(file.Name)
+	return gui.GitCommand.WorkingTree.StageFile(file.Name)
 }
 
 func (gui *Gui) handleEnterFile() error {
@@ -207,11 +207,11 @@ func (gui *Gui) handleFilePress() error {
 		}
 
 		if file.HasUnstagedChanges {
-			if err := gui.GitCommand.WithSpan(gui.Tr.Spans.StageFile).StageFile(file.Name); err != nil {
+			if err := gui.GitCommand.WithSpan(gui.Tr.Spans.StageFile).WorkingTree.StageFile(file.Name); err != nil {
 				return gui.surfaceError(err)
 			}
 		} else {
-			if err := gui.GitCommand.WithSpan(gui.Tr.Spans.UnstageFile).UnStageFile(file.Names(), file.Tracked); err != nil {
+			if err := gui.GitCommand.WithSpan(gui.Tr.Spans.UnstageFile).WorkingTree.UnStageFile(file.Names(), file.Tracked); err != nil {
 				return gui.surfaceError(err)
 			}
 		}
@@ -223,12 +223,12 @@ func (gui *Gui) handleFilePress() error {
 		}
 
 		if node.GetHasUnstagedChanges() {
-			if err := gui.GitCommand.WithSpan(gui.Tr.Spans.StageFile).StageFile(node.Path); err != nil {
+			if err := gui.GitCommand.WithSpan(gui.Tr.Spans.StageFile).WorkingTree.StageFile(node.Path); err != nil {
 				return gui.surfaceError(err)
 			}
 		} else {
 			// pretty sure it doesn't matter that we're always passing true here
-			if err := gui.GitCommand.WithSpan(gui.Tr.Spans.UnstageFile).UnStageFile([]string{node.Path}, true); err != nil {
+			if err := gui.GitCommand.WithSpan(gui.Tr.Spans.UnstageFile).WorkingTree.UnStageFile([]string{node.Path}, true); err != nil {
 				return gui.surfaceError(err)
 			}
 		}
@@ -258,9 +258,9 @@ func (gui *Gui) onFocusFile() error {
 func (gui *Gui) handleStageAll() error {
 	var err error
 	if gui.allFilesStaged() {
-		err = gui.GitCommand.WithSpan(gui.Tr.Spans.UnstageAllFiles).UnstageAll()
+		err = gui.GitCommand.WithSpan(gui.Tr.Spans.UnstageAllFiles).WorkingTree.UnstageAll()
 	} else {
-		err = gui.GitCommand.WithSpan(gui.Tr.Spans.StageAllFiles).StageAll()
+		err = gui.GitCommand.WithSpan(gui.Tr.Spans.StageAllFiles).WorkingTree.StageAll()
 	}
 	if err != nil {
 		_ = gui.surfaceError(err)
@@ -288,7 +288,7 @@ func (gui *Gui) handleIgnoreFile() error {
 	unstageFiles := func() error {
 		return node.ForEachFile(func(file *models.File) error {
 			if file.HasStagedChanges {
-				if err := gitCommand.UnStageFile(file.Names(), file.Tracked); err != nil {
+				if err := gitCommand.WorkingTree.UnStageFile(file.Names(), file.Tracked); err != nil {
 					return err
 				}
 			}
@@ -307,11 +307,11 @@ func (gui *Gui) handleIgnoreFile() error {
 					return err
 				}
 
-				if err := gitCommand.RemoveTrackedFiles(node.GetPath()); err != nil {
+				if err := gitCommand.WorkingTree.RemoveTrackedFiles(node.GetPath()); err != nil {
 					return err
 				}
 
-				if err := gitCommand.Ignore(node.GetPath()); err != nil {
+				if err := gitCommand.WorkingTree.Ignore(node.GetPath()); err != nil {
 					return err
 				}
 				return gui.refreshSidePanels(refreshOptions{scope: []RefreshableView{FILES}})
@@ -323,7 +323,7 @@ func (gui *Gui) handleIgnoreFile() error {
 		return err
 	}
 
-	if err := gitCommand.Ignore(node.GetPath()); err != nil {
+	if err := gitCommand.WorkingTree.Ignore(node.GetPath()); err != nil {
 		return gui.surfaceError(err)
 	}
 
@@ -356,7 +356,7 @@ func (gui *Gui) commitPrefixConfigForRepo() *config.CommitPrefixConfig {
 func (gui *Gui) prepareFilesForCommit() error {
 	noStagedFiles := len(gui.stagedFiles()) == 0
 	if noStagedFiles && gui.UserConfig.Gui.SkipNoStagedFilesWarning {
-		err := gui.GitCommand.WithSpan(gui.Tr.Spans.StageAllFiles).StageAll()
+		err := gui.GitCommand.WithSpan(gui.Tr.Spans.StageAllFiles).WorkingTree.StageAll()
 		if err != nil {
 			return err
 		}
@@ -410,7 +410,7 @@ func (gui *Gui) promptToStageAllAndRetry(retry func() error) error {
 		title:  gui.Tr.NoFilesStagedTitle,
 		prompt: gui.Tr.NoFilesStagedPrompt,
 		handleConfirm: func() error {
-			if err := gui.GitCommand.WithSpan(gui.Tr.Spans.StageAllFiles).StageAll(); err != nil {
+			if err := gui.GitCommand.WithSpan(gui.Tr.Spans.StageAllFiles).WorkingTree.StageAll(); err != nil {
 				return gui.surfaceError(err)
 			}
 			if err := gui.refreshFilesAndSubmodules(); err != nil {
@@ -506,7 +506,7 @@ func (gui *Gui) editFile(filename string) error {
 }
 
 func (gui *Gui) editFileAtLine(filename string, lineNumber int) error {
-	cmdStr, err := gui.GitCommand.EditFileCmdStr(filename, lineNumber)
+	cmdStr, err := gui.GitCommand.Files.GetEditCmdStr(filename, lineNumber)
 	if err != nil {
 		return gui.surfaceError(err)
 	}
@@ -1005,7 +1005,7 @@ func (gui *Gui) handleOpenMergeTool() error {
 		prompt: gui.Tr.MergeToolPrompt,
 		handleConfirm: func() error {
 			return gui.runSubprocessWithSuspenseAndRefresh(
-				gui.GitCommand.OpenMergeToolCmdObj(),
+				gui.GitCommand.WorkingTree.OpenMergeToolCmdObj(),
 			)
 		},
 	})

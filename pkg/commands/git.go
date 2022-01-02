@@ -57,8 +57,10 @@ type GitCommand struct {
 
 	Cmd oscommands.ICmdObjBuilder
 
-	Submodules SubmoduleCommands
-	Tags       TagCommands
+	Submodules  *SubmoduleCommands
+	Tags        *TagCommands
+	WorkingTree *WorkingTreeCommands
+	Files       *FileCommands
 }
 
 // NewGitCommand it runs git commands
@@ -87,8 +89,12 @@ func NewGitCommand(
 
 	cmd := NewGitCmdObjBuilder(cmn.Log, osCommand.Cmd)
 
+	fileLoader := loaders.NewFileLoader(cmn, cmd, gitConfig)
+
+	fileCommands := NewFileCommands(cmn, cmd, gitConfig, osCommand)
 	submoduleCommands := NewSubmoduleCommands(cmn, cmd, dotGitDir)
 	tagCommands := NewTagCommands(cmn, cmd)
+	workingTreeCommands := NewWorkingTreeCommands(cmn, cmd, submoduleCommands, osCommand, fileLoader)
 
 	gitCommand := &GitCommand{
 		Common:        cmn,
@@ -99,14 +105,17 @@ func NewGitCommand(
 		GitConfig:     gitConfig,
 		GetCmdWriter:  func() io.Writer { return ioutil.Discard },
 		Cmd:           cmd,
-		Submodules:    submoduleCommands,
-		Tags:          tagCommands,
+
+		Submodules:  submoduleCommands,
+		Tags:        tagCommands,
+		WorkingTree: workingTreeCommands,
+		Files:       fileCommands,
 	}
 
 	gitCommand.Loaders = Loaders{
 		Commits:       loaders.NewCommitLoader(cmn, gitCommand),
 		Branches:      loaders.NewBranchLoader(cmn, gitCommand),
-		Files:         loaders.NewFileLoader(cmn, cmd, gitConfig),
+		Files:         fileLoader,
 		CommitFiles:   loaders.NewCommitFileLoader(cmn, cmd),
 		Remotes:       loaders.NewRemoteLoader(cmn, cmd, gitCommand.Repo.Remotes),
 		ReflogCommits: loaders.NewReflogCommitLoader(cmn, cmd),
@@ -114,7 +123,7 @@ func NewGitCommand(
 		Tags:          loaders.NewTagLoader(cmn, cmd),
 	}
 
-	gitCommand.PatchManager = patch.NewPatchManager(gitCommand.Log, gitCommand.ApplyPatch, gitCommand.ShowFileDiff)
+	gitCommand.PatchManager = patch.NewPatchManager(gitCommand.Log, gitCommand.WorkingTree.ApplyPatch, gitCommand.WorkingTree.ShowFileDiff)
 
 	return gitCommand, nil
 }
@@ -137,7 +146,7 @@ func (c *GitCommand) WithSpan(span string) *GitCommand {
 	// actually update the PatchManager on the original struct to have the new span.
 	// This means each time we call ApplyPatch in PatchManager, we need to ensure
 	// we've called .WithSpan() ahead of time with the new span value
-	newGitCommand.PatchManager.ApplyPatch = newGitCommand.ApplyPatch
+	newGitCommand.PatchManager.ApplyPatch = newGitCommand.WorkingTree.ApplyPatch
 
 	return newGitCommand
 }

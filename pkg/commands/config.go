@@ -34,10 +34,6 @@ func (c *GitCommand) GetPager(width int) string {
 	return utils.ResolvePlaceholderString(pagerTemplate, templateValues)
 }
 
-func (c *GitCommand) colorArg() string {
-	return c.UserConfig.Git.Paging.ColorArg
-}
-
 // UsingGpg tells us whether the user has gpg enabled so that we can know
 // whether we need to run a subprocess to allow them to enter their password
 func (c *GitCommand) UsingGpg() bool {

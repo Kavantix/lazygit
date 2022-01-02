@@ -19,7 +19,7 @@ func (c *GitCommand) StashSave(message string) error {
 
 // GetStashEntryDiff stash diff
 func (c *GitCommand) ShowStashEntryCmdStr(index int) string {
-	return fmt.Sprintf("git stash show -p --stat --color=%s --unified=%d stash@{%d}", c.colorArg(), c.UserConfig.Git.DiffContextSize, index)
+	return fmt.Sprintf("git stash show -p --stat --color=%s --unified=%d stash@{%d}", c.UserConfig.Git.Paging.ColorArg, c.UserConfig.Git.DiffContextSize, index)
 }
 
 // StashSaveStagedChanges stashes only the currently staged changes. This takes a few steps
@@ -54,7 +54,7 @@ func (c *GitCommand) StashSaveStagedChanges(message string) error {
 
 	for _, file := range files {
 		if file.ShortStatus == "AD" {
-			if err := c.UnStageFile(file.Names(), false); err != nil {
+			if err := c.WorkingTree.UnStageFile(file.Names(), false); err != nil {
 				return err
 			}
 		}

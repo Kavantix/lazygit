@@ -278,3 +278,31 @@ func (c *GitCommand) runSkipEditorCommand(command string) error {
 		).
 		Run()
 }
+
+// DiscardOldFileChanges discards changes to a file from an old commit
+func (c *GitCommand) DiscardOldFileChanges(commits []*models.Commit, commitIndex int, fileName string) error {
+	if err := c.BeginInteractiveRebaseForCommit(commits, commitIndex); err != nil {
+		return err
+	}
+
+	// check if file exists in previous commit (this command returns an error if the file doesn't exist)
+	if err := c.Cmd.New("git cat-file -e HEAD^:" + c.Cmd.Quote(fileName)).Run(); err != nil {
+		if err := c.OSCommand.Remove(fileName); err != nil {
+			return err
+		}
+		if err := c.WorkingTree.StageFile(fileName); err != nil {
+			return err
+		}
+	} else if err := c.WorkingTree.CheckoutFile("HEAD^", fileName); err != nil {
+		return err
+	}
+
+	// amend the commit
+	err := c.AmendHead()
+	if err != nil {
+		return err
+	}
+
+	// continue
+	return c.GenericMergeOrRebaseAction("rebase", "continue")
+}

@@ -34,8 +34,8 @@ func (gui *Gui) refreshStagingPanel(forceSecondaryFocused bool, selectedLineIdx 
 	}
 
 	// note for custom diffs, we'll need to send a flag here saying not to use the custom diff
-	diff := gui.GitCommand.WorktreeFileDiff(file, true, secondaryFocused, false)
-	secondaryDiff := gui.GitCommand.WorktreeFileDiff(file, true, !secondaryFocused, false)
+	diff := gui.GitCommand.WorkingTree.WorktreeFileDiff(file, true, secondaryFocused, false)
+	secondaryDiff := gui.GitCommand.WorkingTree.WorktreeFileDiff(file, true, !secondaryFocused, false)
 
 	// if we have e.g. a deleted file with nothing else to the diff will have only
 	// 4-5 lines in which case we'll swap panels
@@ -143,7 +143,7 @@ func (gui *Gui) applySelection(reverse bool, state *LblPanelState) error {
 	if !reverse || state.SecondaryFocused {
 		applyFlags = append(applyFlags, "cached")
 	}
-	err := gui.GitCommand.WithSpan(gui.Tr.Spans.ApplyPatch).ApplyPatch(patch, applyFlags...)
+	err := gui.GitCommand.WithSpan(gui.Tr.Spans.ApplyPatch).WorkingTree.ApplyPatch(patch, applyFlags...)
 	if err != nil {
 		return gui.surfaceError(err)
 	}

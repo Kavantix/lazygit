@@ -194,7 +194,7 @@ func (gui *Gui) catSelectedFile() (string, error) {
 		return "", errors.New(gui.Tr.NotAFile)
 	}
 
-	cat, err := gui.GitCommand.CatFile(item.Name)
+	cat, err := gui.GitCommand.Files.Cat(item.Name)
 	if err != nil {
 		gui.Log.Error(err)
 		return "", err

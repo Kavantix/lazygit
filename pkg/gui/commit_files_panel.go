@@ -45,7 +45,7 @@ func (gui *Gui) commitFilesRenderToMain() error {
 	to := gui.State.CommitFileManager.GetParent()
 	from, reverse := gui.getFromAndReverseArgsForDiff(to)
 
-	cmdObj := gui.GitCommand.ShowFileDiffCmdObj(from, to, reverse, node.GetPath(), false)
+	cmdObj := gui.GitCommand.WorkingTree.ShowFileDiffCmdObj(from, to, reverse, node.GetPath(), false)
 	task := NewRunPtyTask(cmdObj.GetCmd())
 
 	return gui.refreshMainViews(refreshMainOpts{
@@ -63,7 +63,7 @@ func (gui *Gui) handleCheckoutCommitFile() error {
 		return nil
 	}
 
-	if err := gui.GitCommand.WithSpan(gui.Tr.Spans.CheckoutFile).CheckoutFile(gui.State.CommitFileManager.GetParent(), node.GetPath()); err != nil {
+	if err := gui.GitCommand.WithSpan(gui.Tr.Spans.CheckoutFile).WorkingTree.CheckoutFile(gui.State.CommitFileManager.GetParent(), node.GetPath()); err != nil {
 		return gui.surfaceError(err)
 	}
 

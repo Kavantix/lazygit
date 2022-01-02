@@ -220,31 +220,3 @@ func TestGitCommandCurrentBranchName(t *testing.T) {
 		})
 	}
 }
-
-func TestGitCommandResetHard(t *testing.T) {
-	type scenario struct {
-		testName string
-		ref      string
-		runner   *oscommands.FakeCmdObjRunner
-		test     func(error)
-	}
-
-	scenarios := []scenario{
-		{
-			"valid case",
-			"HEAD",
-			oscommands.NewFakeRunner(t).
-				Expect(`git reset --hard "HEAD"`, "", nil),
-			func(err error) {
-				assert.NoError(t, err)
-			},
-		},
-	}
-
-	for _, s := range scenarios {
-		t.Run(s.testName, func(t *testing.T) {
-			gitCmd := NewDummyGitCommandWithRunner(s.runner)
-			s.test(gitCmd.ResetHard(s.ref))
-		})
-	}
-}

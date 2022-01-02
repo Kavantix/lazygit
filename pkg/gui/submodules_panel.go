@@ -36,7 +36,7 @@ func (gui *Gui) submodulesRenderToMain() error {
 		if file == nil {
 			task = NewRenderStringTask(prefix)
 		} else {
-			cmdObj := gui.GitCommand.WorktreeFileDiffCmdObj(file, false, !file.HasUnstagedChanges && file.HasStagedChanges, gui.State.IgnoreWhitespaceInDiffView)
+			cmdObj := gui.GitCommand.WorkingTree.WorktreeFileDiffCmdObj(file, false, !file.HasUnstagedChanges && file.HasStagedChanges, gui.State.IgnoreWhitespaceInDiffView)
 			task = NewRunCommandTaskWithPrefix(cmdObj.GetCmd(), prefix)
 		}
 	}
@@ -109,7 +109,7 @@ func (gui *Gui) resetSubmodule(submodule *models.SubmoduleConfig) error {
 
 	file := gui.fileForSubmodule(submodule)
 	if file != nil {
-		if err := gitCommand.UnStageFile(file.Names(), file.Tracked); err != nil {
+		if err := gitCommand.WorkingTree.UnStageFile(file.Names(), file.Tracked); err != nil {
 			return gui.surfaceError(err)
 		}
 	}

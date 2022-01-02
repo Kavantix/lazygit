@@ -25,8 +25,8 @@ type SubmoduleCommands struct {
 	dotGitDir string
 }
 
-func NewSubmoduleCommands(common *common.Common, cmd oscommands.ICmdObjBuilder, dotGitDir string) SubmoduleCommands {
-	return SubmoduleCommands{
+func NewSubmoduleCommands(common *common.Common, cmd oscommands.ICmdObjBuilder, dotGitDir string) *SubmoduleCommands {
+	return &SubmoduleCommands{
 		Common:    common,
 		cmd:       cmd,
 		dotGitDir: dotGitDir,
